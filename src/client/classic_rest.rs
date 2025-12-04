@@ -48,11 +48,11 @@ impl KuCoinClient {
     /// - endpoint: Path.
     ///
     /// #Returns Self.
-    pub fn new(credentials: Credentials, base: &str, endpoint: &str) -> Self {
+    pub fn new(credentials: Credentials) -> Self {
         KuCoinClient {
             credentials,
-            base_link: base.to_string(),
-            endpoint: endpoint.to_string(),
+            base_link: "".to_string(),
+            endpoint: "".to_string(),
             http_client: Client::new(),
         }
     }
