@@ -125,10 +125,11 @@ mod test {
     #[tokio::test]
     async fn test_get_deposits() {
         // 1. Setup Credentials
-        let api_key = env::var("api_key").unwrap();
-        let api_secret = env::var("api_secret").unwrap();
-        let api_passphrase = env::var("api_passphrase").unwrap();
-        let credentials = Credentials::new(&api_key, &api_secret, &api_passphrase);
+        let credentials = Credentials::new(
+            &env::var("api_key").unwrap(),
+            &env::var("api_secret").unwrap(),
+            &env::var("api_passphrase").unwrap(),
+        );
 
         // 2. Initialize Client
         let mut client = KuCoinClient::new(credentials);
@@ -146,10 +147,11 @@ mod test {
     #[tokio::test]
     async fn test_transaction_lookup() {
         // 1. Setup Credentials
-        let api_key = env::var("api_key").unwrap();
-        let api_secret = env::var("api_secret").unwrap();
-        let api_passphrase = env::var("api_passphrase").unwrap();
-        let credentials = Credentials::new(&api_key, &api_secret, &api_passphrase);
+        let credentials = Credentials::new(
+            &env::var("api_key").unwrap(),
+            &env::var("api_secret").unwrap(),
+            &env::var("api_passphrase").unwrap(),
+        );
 
         // 2. Initialize Client
         let mut client = KuCoinClient::new(credentials);

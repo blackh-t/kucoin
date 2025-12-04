@@ -1,3 +1,4 @@
+use secrecy::{ExposeSecret, SecretString};
 use serde::de::DeserializeOwned;
 use std::str::FromStr;
 
@@ -13,18 +14,18 @@ use reqwest::{
 /// Holds API authentication secrets (Key, Secret, Passphrase).
 #[derive(Clone)]
 pub struct Credentials {
-    key: String,
-    secret: String,
-    passphrase: String,
+    key: SecretString,
+    secret: SecretString,
+    passphrase: SecretString,
 }
 
 impl Credentials {
     /// Create a new 'Credentials' instance.
     pub fn new(key: &str, secret: &str, passphrase: &str) -> Self {
         Credentials {
-            key: key.to_string(),
-            secret: secret.to_string(),
-            passphrase: passphrase.to_string(),
+            key: SecretString::new(key.into()),
+            secret: SecretString::new(secret.into()),
+            passphrase: SecretString::new(passphrase.into()),
         }
     }
 }
@@ -107,15 +108,16 @@ impl KuCoinClient {
         // Encrypting
         let timestamp = &time::get_timestamp();
         let sign = encrypt_prehash(
-            &self.credentials.secret,
+            &self.credentials.secret.expose_secret(),
             timestamp,
             method,
             &self.endpoint,
             payload,
         );
+
         let passphrase = encrypt_pass(
-            self.credentials.secret.clone(),
-            self.credentials.passphrase.clone(),
+            self.credentials.secret.expose_secret().to_string(),
+            self.credentials.passphrase.expose_secret().to_string(),
         );
 
         // Build Headers
@@ -124,7 +126,7 @@ impl KuCoinClient {
 
         headers.insert(
             "KC-API-KEY",
-            HeaderValue::from_str(self.credentials.key.as_str())?,
+            HeaderValue::from_str(self.credentials.key.expose_secret().as_str())?,
         );
         headers.insert("KC-API-SIGN", HeaderValue::from_str(sign.as_str())?);
         headers.insert("KC-API-TIMESTAMP", HeaderValue::from_str(&timestamp)?);
