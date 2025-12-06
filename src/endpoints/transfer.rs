@@ -4,6 +4,7 @@ use crate::{
         requests::transfer_req_type::{AccountType, TransferRequest, TransferType},
         responses::{transfer_res_type::TransferData, KuCoinResponse},
     },
+    utils::errors::{KucoinErrors, KucoinResults},
 };
 use uuid::Uuid;
 
@@ -74,26 +75,23 @@ impl TransferRequest {
     ///
     /// # Returns
     /// - Request Body in json-string.
-    fn build(self, client: &mut KuCoinClient) -> Result<String, String> {
+    fn build(self, client: &mut KuCoinClient) -> KucoinResults<String> {
         // Validate payload.
         let check_tag = |tag: &Option<String>, acc_type: &AccountType, name: &str| {
             if tag.is_none() && matches!(&acc_type, AccountType::Isolated | AccountType::IsolatedV2)
             {
-                return Err(format!(
-                    "Account tag is required for {} ISOLATED account",
-                    name
-                ));
+                return Err(KucoinErrors::MissingIsolatedTag(name.to_string()));
             }
             Ok(())
         };
 
-        let _ = check_tag(&self.from_account_tag, &self.from_account_type, "Sender");
-        let _ = check_tag(&self.to_account_tag, &self.to_account_type, "Receiver");
+        check_tag(&self.from_account_tag, &self.from_account_type, "Sender")?;
+        check_tag(&self.to_account_tag, &self.to_account_type, "Receiver")?;
 
         client.base_link = "https://api.kucoin.com".to_string();
         client.endpoint = "/api/v3/accounts/universal-transfer".to_string();
 
-        let json = serde_json::to_string(&self).unwrap();
+        let json = serde_json::to_string(&self)?;
         Ok(json)
     }
 }
@@ -109,7 +107,7 @@ impl KuCoinClient {
     pub async fn transfer(
         mut self,
         reqwest: TransferRequest,
-    ) -> Result<KuCoinResponse<TransferData>, reqwest::Error> {
+    ) -> KucoinResults<KuCoinResponse<TransferData>> {
         let payload = reqwest.build(&mut self);
         let body = match payload {
             Ok(res) => res,
