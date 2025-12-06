@@ -2,10 +2,9 @@ use crate::{
     client::classic_rest::KuCoinClient,
     types::{
         requests::transfer_req_type::{AccountType, TransferRequest, TransferType},
-        responses::KuCoinResponse,
+        responses::{transfer_res_type::TransferData, KuCoinResponse},
     },
 };
-use ethers::types::TransactionReceipt;
 use uuid::Uuid;
 
 impl TransferRequest {
@@ -110,7 +109,7 @@ impl KuCoinClient {
     pub async fn transfer(
         mut self,
         reqwest: TransferRequest,
-    ) -> Result<KuCoinResponse<TransactionReceipt>, reqwest::Error> {
+    ) -> Result<KuCoinResponse<TransferData>, reqwest::Error> {
         let payload = reqwest.build(&mut self);
         let body = match payload {
             Ok(res) => res,
@@ -118,7 +117,7 @@ impl KuCoinClient {
         };
 
         let res = self
-            .send::<KuCoinResponse<TransactionReceipt>>("POST", &body)
+            .send::<KuCoinResponse<TransferData>>("POST", &body)
             .await?;
         Ok(res)
     }
