@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct DepositQuery {
+pub struct DepositHistoryRequest {
     /// currency
     pub currency: String,
     /// Current request page.
