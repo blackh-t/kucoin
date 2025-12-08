@@ -2,9 +2,12 @@ use secrecy::{ExposeSecret, SecretString};
 use serde::de::DeserializeOwned;
 use std::str::FromStr;
 
-use crate::utils::{
-    auth::{encrypt_pass, encrypt_prehash},
-    time,
+use crate::{
+    endpoints::{deposit::DepositHandler, trades::SpotHandler, transfer::TransferHandler},
+    utils::{
+        auth::{encrypt_pass, encrypt_prehash},
+        time,
+    },
 };
 use reqwest::{
     header::{HeaderMap, HeaderValue, InvalidHeaderValue, CONTENT_TYPE},
@@ -36,8 +39,6 @@ pub struct KuCoinClient {
     credentials: Credentials,
     /// The API host URL (e.g., https://api.kucoin.com).
     pub base_link: String,
-    /// The specific API endpoint path.
-    pub endpoint: String,
     http_client: Client,
 }
 
@@ -52,8 +53,7 @@ impl KuCoinClient {
     pub fn new(credentials: Credentials) -> Self {
         KuCoinClient {
             credentials,
-            base_link: "".to_string(),
-            endpoint: "".to_string(),
+            base_link: "https://api.kucoin.com".to_string(),
             http_client: Client::new(),
         }
     }
@@ -78,10 +78,11 @@ impl KuCoinClient {
         &self,
         method: &str,
         payload: &str,
+        endpoint: &str,
     ) -> Result<T, reqwest::Error> {
-        let headers = self.get_headers(payload, method);
+        let headers = self.get_headers(payload, method, endpoint);
         let method_type = Method::from_str(method).unwrap();
-        let url = format!("{}{}", self.base_link.clone(), self.endpoint.clone());
+        let url = format!("{}{}", self.base_link, endpoint);
 
         // Build Dyn Request based on the method_type.
         let response = self
@@ -100,18 +101,24 @@ impl KuCoinClient {
     /// # Parameters
     /// - payload   : Body for HTTP-request.
     /// - method    : HTTP-request method.
+    /// - endpoint  : Service endpoint
     ///
     /// # Returns
     /// - If headers value passed : A set of HTTP headers.
     /// - If not passed: Error msg.
-    fn get_headers(&self, payload: &str, method: &str) -> Result<HeaderMap, InvalidHeaderValue> {
+    fn get_headers(
+        &self,
+        payload: &str,
+        method: &str,
+        endpoint: &str,
+    ) -> Result<HeaderMap, InvalidHeaderValue> {
         // Encrypting
         let timestamp = &time::get_timestamp();
         let sign = encrypt_prehash(
             &self.credentials.secret.expose_secret(),
             timestamp,
             method,
-            &self.endpoint,
+            endpoint,
             payload,
         );
 
@@ -136,5 +143,19 @@ impl KuCoinClient {
         );
         headers.insert("KC-API-KEY-VERSION", HeaderValue::from_static("3"));
         Ok(headers)
+    }
+
+    // --- Modular Accessors ---
+
+    pub fn deposit(&self) -> DepositHandler {
+        DepositHandler { client: self }
+    }
+
+    pub fn spot(&self) -> SpotHandler {
+        SpotHandler { client: self }
+    }
+
+    pub fn transfer(&self) -> TransferHandler {
+        TransferHandler { client: self }
     }
 }

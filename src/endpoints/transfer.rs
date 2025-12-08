@@ -8,6 +8,10 @@ use crate::{
 };
 use uuid::Uuid;
 
+pub struct TransferHandler<'a> {
+    pub client: &'a KuCoinClient,
+}
+
 impl TransferRequest {
     /// Creates a new transfer request with an auto-generated unique ID (`client_oid`).
     ///
@@ -75,7 +79,7 @@ impl TransferRequest {
     ///
     /// # Returns
     /// - Request Body in json-string.
-    fn build(self, client: &mut KuCoinClient) -> KucoinResults<String> {
+    fn build_body(&self) -> KucoinResults<String> {
         // Validate payload.
         let check_tag = |tag: &Option<String>, acc_type: &AccountType, name: &str| {
             if tag.is_none() && matches!(&acc_type, AccountType::Isolated | AccountType::IsolatedV2)
@@ -88,15 +92,12 @@ impl TransferRequest {
         check_tag(&self.from_account_tag, &self.from_account_type, "Sender")?;
         check_tag(&self.to_account_tag, &self.to_account_type, "Receiver")?;
 
-        client.base_link = "https://api.kucoin.com".to_string();
-        client.endpoint = "/api/v3/accounts/universal-transfer".to_string();
-
         let json = serde_json::to_string(&self)?;
         Ok(json)
     }
 }
 
-impl KuCoinClient {
+impl<'a> TransferHandler<'a> {
     /// Executes a universal transfer between accounts.
     ///
     /// # Panics
@@ -104,18 +105,16 @@ impl KuCoinClient {
     ///
     /// # Returns
     /// The transaction receipt on success, or a `reqwest::Error` if the network request fails.
-    pub async fn transfer(
-        &mut self,
-        reqwest: TransferRequest,
+    pub async fn execute(
+        &self,
+        request: TransferRequest,
     ) -> KucoinResults<KuCoinResponse<TransferData>> {
-        let payload = reqwest.build(self);
-        let body = match payload {
-            Ok(res) => res,
-            Err(e) => panic!("Err: {}", e),
-        };
+        let body = request.build_body()?; // Get JSON body
+        let endpoint = "/api/v3/accounts/universal-transfer";
 
         let res = self
-            .send::<KuCoinResponse<TransferData>>("POST", &body)
+            .client
+            .send::<KuCoinResponse<TransferData>>("POST", &body, endpoint)
             .await?;
         Ok(res)
     }
@@ -137,7 +136,7 @@ mod test {
         );
 
         // 2. Initialize Client
-        let mut client = KuCoinClient::new(credentials);
+        let client = KuCoinClient::new(credentials);
 
         // 3. Generate request.
         let request = TransferRequest::new(
@@ -149,7 +148,7 @@ mod test {
         );
 
         // 4. Execute tranaction.
-        match client.transfer(request).await {
+        match client.transfer().execute(request).await {
             Ok(result) => println!("Transfer: {:#?}", result),
             Err(e) => panic!("Transfer failed: {}", e),
         }

@@ -6,6 +6,10 @@ use crate::{
     },
 };
 
+pub struct DepositHandler<'a> {
+    pub client: &'a KuCoinClient,
+}
+
 impl DepositHistoryRequest {
     /// Create a new Deposit query with the mandatory 'currency' field.
     /// Examples currency: BTC,ETH,USDT
@@ -60,41 +64,27 @@ impl DepositHistoryRequest {
     ///
     /// # Returns
     /// - Request query for deposit in string.
-    fn build(self, client: &mut KuCoinClient) -> String {
+    fn build_endpoint(&self) -> String {
         let query = serde_urlencoded::to_string(&self).unwrap();
-        client.base_link = "https://api.kucoin.com".to_string();
-        client.endpoint = format!("/api/v1/deposits?{}", query);
-
-        let json = serde_json::to_string(&self).unwrap();
-        json
+        format!("/api/v1/deposits?{}", query)
     }
 }
 
-impl KuCoinClient {
-    /// Fetch deposit history filtered by 'DepositQuery'
-    pub async fn get_deposit_history(
-        &mut self,
+impl<'a> DepositHandler<'a> {
+    pub async fn history(
+        &self,
         filter: DepositHistoryRequest,
     ) -> Result<KuCoinResponse<DepositList>, reqwest::Error> {
-        filter.build(self);
-        self.send("GET", "").await
+        // Build endpoint
+        let endpoint = filter.build_endpoint();
+        self.client
+            .send::<KuCoinResponse<DepositList>>("GET", "", &endpoint)
+            .await
     }
 
-    /// Looks up a specific deposit by its transaction hash (TX ID).
-    ///
-    /// # Arguments
-    /// * `signature` - The Transaction Hash (TX ID) to search for.
-    ///
-    /// # Returns
-    /// * `Ok(Some(Item))` - The transaction info if found.
-    /// * `Ok(None)` - If match is found.
-    /// * `Err(reqwest::Error)` - If the API request fails.
-    pub async fn find_deposit_from(
-        &mut self,
-        signature: &str,
-    ) -> Result<Option<Deposit>, reqwest::Error> {
+    pub async fn by_tx_hash(&self, signature: &str) -> Result<Option<Deposit>, reqwest::Error> {
         let filter = DepositHistoryRequest::new("");
-        let deposit_log = self.get_deposit_history(filter).await?;
+        let deposit_log = self.history(filter).await?;
 
         let items = match deposit_log.data {
             Some(data) => data.items,
@@ -125,7 +115,7 @@ mod test {
         );
 
         // 2. Initialize Client
-        let mut client = KuCoinClient::new(credentials);
+        let client = KuCoinClient::new(credentials);
 
         // 3. configure search_filter.
         let search_filter = DepositHistoryRequest::new("SOL")
@@ -133,8 +123,8 @@ mod test {
             .set_page_size(20); // 20 rows per page.
 
         // 4. Fetch deposit history for client.
-        let deposit_log = client.get_deposit_history(search_filter).await;
-        println!("Deposit history: {:#?}", deposit_log);
+        let res = client.deposit().history(search_filter).await;
+        println!("Deposit history: {:#?}", res);
     }
 
     #[tokio::test]
@@ -147,10 +137,10 @@ mod test {
         );
 
         // 2. Initialize Client
-        let mut client = KuCoinClient::new(credentials);
+        let client = KuCoinClient::new(credentials);
 
         // 3. Get a target deposit log.
-        let deposit_log = client.find_deposit_from("x");
-        println!("Deposit history: {:#?}", deposit_log.await.unwrap());
+        let res = client.deposit().by_tx_hash("x").await;
+        println!("Deposit history: {:#?}", res.unwrap());
     }
 }
