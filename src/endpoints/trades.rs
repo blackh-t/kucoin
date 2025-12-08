@@ -3,10 +3,14 @@ use uuid::Uuid;
 use crate::{
     client::classic_rest::KuCoinClient,
     types::{
-        requests::spot_contract_req_type::{
-            BatchSpotContract, Side, SpotContract, Stp, TimeInForce, TradeType,
+        requests::{
+            spot_cancel_req_type::SpotQuery,
+            spot_contract_req_type::{
+                BatchSpotContract, Side, SpotContract, Stp, TimeInForce, TradeType,
+            },
         },
         responses::{
+            spot_cancel_res_type::SpotCanceledData,
             spot_contract_res_type::{BatchOrderResult, SpotData},
             KuCoinResponse,
         },
@@ -150,8 +154,30 @@ impl BatchSpotContract {
     }
 }
 
+impl SpotQuery {
+    /// Generate cancel partial order contact.
+    pub fn new(order_id: &str, cancel_size: f64, symbol: &str) -> Self {
+        SpotQuery {
+            order_id: order_id.to_string(),
+            cancel_size: cancel_size.to_string(),
+            symbol: symbol.to_string(),
+        }
+    }
+
+    async fn build(self, client: &mut KuCoinClient) -> KucoinResults<String> {
+        client.base_link = "https://api.kucoin.com".to_string();
+        client.endpoint = format!(
+            "/api/v1/hf/orders/cancel/{}?symbol={}&cancelSize={}",
+            self.order_id, self.symbol, self.cancel_size
+        );
+
+        let json = serde_json::to_string(&self)?;
+        Ok(json)
+    }
+}
+
 impl KuCoinClient {
-    /// Generate payload to place a new spot-contract.
+    /// Place a new spot-contract.
     ///
     /// # Attributes
     /// * contract - is a type of 'SpotContract'
@@ -177,7 +203,7 @@ impl KuCoinClient {
         Ok(res)
     }
 
-    /// Generate payload to place batch spottrade orders.
+    /// Place a batch of spot orders.
     ///
     /// # Attributes
     /// * contracts - A collection of 'SpotContract'.
@@ -189,8 +215,25 @@ impl KuCoinClient {
         contracts: BatchSpotContract,
     ) -> KucoinResults<BatchOrderResult> {
         let payload = contracts.build(self).await?;
-        println!("payload: {}", payload);
         let res = self.send::<BatchOrderResult>("POST", &payload).await?;
+        Ok(res)
+    }
+
+    /// This interface can cancel the specified quantity of the order according to the orderId.
+    ///
+    /// # Attributes
+    /// * contract - SpotQuery.
+    ///
+    /// # Returns
+    /// * order id and the canceled size on success, else error msg.
+    pub async fn cancel_partial_order(
+        &mut self,
+        contract: SpotQuery,
+    ) -> KucoinResults<KuCoinResponse<SpotCanceledData>> {
+        let _ = contract.build(self).await?;
+        let res = self
+            .send::<KuCoinResponse<SpotCanceledData>>("DELETE", "")
+            .await?;
         Ok(res)
     }
 }
@@ -216,7 +259,7 @@ mod test {
 
         // 3. Generate SpotContract.
         let open_long_btc = SpotContract::new(TradeType::Market, "BTC-USDT", Side::Buy)
-            .set_funds(100.0)
+            .set_funds(0.0)
             .set_remark("syndicate");
 
         // 4. Execute.
@@ -240,10 +283,10 @@ mod test {
 
         // 3. Generate SpotContracts.
         let btc_contract = SpotContract::new(TradeType::Market, "BTC-USDT", Side::Buy)
-            .set_funds(100.0)
+            .set_funds(0.0)
             .set_remark("syndicate");
         let sol_contract = SpotContract::new(TradeType::Market, "SOL-USDT", Side::Buy)
-            .set_funds(200.0)
+            .set_funds(0.0)
             .set_remark("syndicate2");
 
         let orders = BatchSpotContract::new()
@@ -254,6 +297,26 @@ mod test {
         match client.send_multi_orders(orders).await {
             Ok(res) => println!("Trade Orders: {:#?}", res),
             Err(e) => println!("Multi Orders Err: {:?}", e),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_cancel_partial_order() {
+        // 1. Setup Credentials
+        let credentials = Credentials::new(
+            &env::var("api_key").unwrap(),
+            &env::var("api_secret").unwrap(),
+            &env::var("api_passphrase").unwrap(),
+        );
+
+        // 2. Initialize Client
+        let mut client = KuCoinClient::new(credentials);
+
+        // 3. Generate query and execute.
+        let query = SpotQuery::new("x", 0.01, "BTC-USDT");
+        match client.cancel_partial_order(query).await {
+            Ok(res) => println!("Spot Canceled res: {:#?}", res),
+            Err(e) => println!("Spot Canceled Err: {:?}", e),
         }
     }
 }
