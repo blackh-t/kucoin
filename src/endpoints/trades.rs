@@ -181,8 +181,8 @@ impl KuCoinClient {
     ///
     /// # Example om creating a contract
     /// ```no_run
-    /// use kucoin::types::requests::spot_contract_req_type::{SpotContract, TradeType, Side};
-    /// let contract = SpotContract::new(TradeType::Market, "BTC-USDT", Side::Buy)
+    /// use kucoin::types::spot::{SpotOrderRequest, TradeType, Side};
+    /// let contract = SpotOrderRequest::new(TradeType::Market, "BTC-USDT", Side::Buy)
     ///                     .set_funds(1000.00)
     ///                     .set_remark("syndicate");
     /// ```
