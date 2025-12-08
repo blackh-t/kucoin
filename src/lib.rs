@@ -1,4 +1,4 @@
 pub mod client;
 pub mod endpoints;
-mod types;
+pub mod types;
 mod utils;
