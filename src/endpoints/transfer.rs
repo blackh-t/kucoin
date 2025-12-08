@@ -105,10 +105,10 @@ impl KuCoinClient {
     /// # Returns
     /// The transaction receipt on success, or a `reqwest::Error` if the network request fails.
     pub async fn transfer(
-        mut self,
+        &mut self,
         reqwest: TransferRequest,
     ) -> KucoinResults<KuCoinResponse<TransferData>> {
-        let payload = reqwest.build(&mut self);
+        let payload = reqwest.build(self);
         let body = match payload {
             Ok(res) => res,
             Err(e) => panic!("Err: {}", e),
@@ -137,7 +137,7 @@ mod test {
         );
 
         // 2. Initialize Client
-        let client = KuCoinClient::new(credentials);
+        let mut client = KuCoinClient::new(credentials);
 
         // 3. Generate request.
         let request = TransferRequest::new(
@@ -150,7 +150,7 @@ mod test {
 
         // 4. Execute tranaction.
         match client.transfer(request).await {
-            Ok(result) => println!("{:#?}", result),
+            Ok(result) => println!("Transfer: {:#?}", result),
             Err(e) => panic!("Transfer failed: {}", e),
         }
     }
