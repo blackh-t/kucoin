@@ -1,19 +1,16 @@
 use crate::{
-    client::classic_rest::KuCoinClient,
+    client::rest::KuCoinClient,
     types::{
-        requests::deposit_req_type::{DepositQuery, DepositStatus},
-        responses::{
-            deposit_res_type::{Deposit, DepositList},
-            KuCoinResponse,
-        },
+        deposit::{Deposit, DepositHistoryRequest, DepositList, DepositStatus},
+        KuCoinResponse,
     },
 };
 
-impl DepositQuery {
+impl DepositHistoryRequest {
     /// Create a new Deposit query with the mandatory 'currency' field.
     /// Examples currency: BTC,ETH,USDT
     pub fn new(currency: &str) -> Self {
-        DepositQuery {
+        DepositHistoryRequest {
             currency: currency.to_string(),
             current_page: None,
             end_at: None,
@@ -77,7 +74,7 @@ impl KuCoinClient {
     /// Fetch deposit history filtered by 'DepositQuery'
     pub async fn get_deposit_history(
         &mut self,
-        filter: DepositQuery,
+        filter: DepositHistoryRequest,
     ) -> Result<KuCoinResponse<DepositList>, reqwest::Error> {
         filter.build(self);
         self.send("GET", "").await
@@ -96,7 +93,7 @@ impl KuCoinClient {
         &mut self,
         signature: &str,
     ) -> Result<Option<Deposit>, reqwest::Error> {
-        let filter = DepositQuery::new("");
+        let filter = DepositHistoryRequest::new("");
         let deposit_log = self.get_deposit_history(filter).await?;
 
         let items = match deposit_log.data {
@@ -114,13 +111,9 @@ impl KuCoinClient {
 #[cfg(test)]
 mod test {
 
-    use std::env;
-
     use super::*;
-    use crate::{
-        client::classic_rest::Credentials,
-        types::requests::deposit_req_type::{DepositQuery, DepositStatus},
-    };
+    use crate::client::rest::Credentials;
+    use std::env;
 
     #[tokio::test]
     async fn test_get_deposits() {
@@ -135,7 +128,7 @@ mod test {
         let mut client = KuCoinClient::new(credentials);
 
         // 3. configure search_filter.
-        let search_filter = DepositQuery::new("SOL")
+        let search_filter = DepositHistoryRequest::new("SOL")
             .set_status(DepositStatus::Success)
             .set_page_size(20); // 20 rows per page.
 

@@ -1,8 +1,8 @@
 use crate::{
-    client::classic_rest::KuCoinClient,
+    client::rest::KuCoinClient,
     types::{
-        requests::transfer_req_type::{AccountType, TransferRequest, TransferType},
-        responses::{transfer_res_type::TransferData, KuCoinResponse},
+        transfer::{AccountType, TransferData, TransferRequest, TransferType},
+        KuCoinResponse,
     },
     utils::errors::{KucoinErrors, KucoinResults},
 };
@@ -124,7 +124,7 @@ impl KuCoinClient {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::client::classic_rest::Credentials;
+    use crate::client::rest::Credentials;
     use std::env;
 
     #[tokio::test]

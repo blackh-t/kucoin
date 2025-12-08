@@ -3,7 +3,7 @@ use serde::de::DeserializeOwned;
 use std::str::FromStr;
 
 use crate::utils::{
-    encoder::{encrypt_pass, encrypt_prehash},
+    auth::{encrypt_pass, encrypt_prehash},
     time,
 };
 use reqwest::{
