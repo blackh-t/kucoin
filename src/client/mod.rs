@@ -1,1 +1,1 @@
-pub mod classic_rest;
+pub mod rest;
