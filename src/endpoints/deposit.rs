@@ -13,9 +13,9 @@ pub struct DepositHandler<'a> {
 impl DepositHistoryRequest {
     /// Create a new Deposit query with the mandatory 'currency' field.
     /// Examples currency: BTC,ETH,USDT
-    pub fn new(currency: &str) -> Self {
+    pub fn new(currency: Option<String>) -> Self {
         DepositHistoryRequest {
-            currency: currency.to_string(),
+            currency: currency,
             current_page: None,
             end_at: None,
             page_size: None,
@@ -65,8 +65,11 @@ impl DepositHistoryRequest {
     /// # Returns
     /// - Request query for deposit in string.
     fn build_endpoint(&self) -> String {
-        let query = serde_urlencoded::to_string(&self).unwrap();
-        format!("/api/v1/deposits?{}", query)
+        if let Some(ticker) = self.currency.clone() {
+            let query = serde_urlencoded::to_string(&self).unwrap();
+            return format!("/api/v1/deposits?{}", query);
+        }
+        "/api/v1/deposits".to_string()
     }
 }
 
@@ -83,7 +86,7 @@ impl<'a> DepositHandler<'a> {
     }
 
     pub async fn by_tx_hash(&self, signature: &str) -> Result<Option<Deposit>, reqwest::Error> {
-        let filter = DepositHistoryRequest::new("");
+        let filter = DepositHistoryRequest::new(None);
         let deposit_log = self.history(filter).await?;
 
         let items = match deposit_log.data {
@@ -118,7 +121,7 @@ mod test {
         let client = KuCoinClient::new(credentials);
 
         // 3. configure search_filter.
-        let search_filter = DepositHistoryRequest::new("SOL")
+        let search_filter = DepositHistoryRequest::new(Some("SOL".to_string()))
             .set_status(DepositStatus::Success)
             .set_page_size(20); // 20 rows per page.
 
@@ -140,7 +143,7 @@ mod test {
         let client = KuCoinClient::new(credentials);
 
         // 3. Get a target deposit log.
-        let res = client.deposit().by_tx_hash("x").await;
-        println!("Deposit history: {:#?}", res.unwrap());
+        let res = client.deposit().by_tx_hash("4h1HgWnEdxjJrnQj3NzzBngEm8oJsyCBHuT8srCK6vfasD2YDuGFkeoZ1G1XwRKRrxN5YBNRZJ36qTu9BYt41aGn").await;
+        println!("Deposit history: {:#?}", res);
     }
 }
