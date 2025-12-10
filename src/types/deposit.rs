@@ -3,17 +3,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DepositHistoryRequest {
-    /// currency
-    pub currency: String,
-    /// Current request page.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub currency: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub current_page: Option<i64>,
-    /// End time (milliseconds)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub end_at: Option<i64>,
-    /// Number of results per request. Minimum is 10, maximum is 500.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub page_size: Option<i64>,
-    /// Start time (milliseconds)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub start_at: Option<i64>,
-    /// Status. Available value: PROCESSING, SUCCESS, and FAILURE
+
+    // If this is None, the URL param is removed -> API returns ALL statuses.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<DepositStatus>,
 }
 
@@ -64,7 +66,7 @@ pub struct Deposit {
 }
 
 /// Status. Available value: PROCESSING, SUCCESS, and FAILURE
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum DepositStatus {
     Failure,
