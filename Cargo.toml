@@ -1,7 +1,18 @@
 [package]
 name = "kucoin"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
+description = "A robust and asynchronous Rust client for the KuCoin exchange API."
+license = "MIT"
+repository = "https://github.com/blackh-t/kucoin"
+documentation = "https://docs.rs/kucoin"
+readme = "README.md"
+keywords = ["kucoin", "crypto", "exchange", "trading", "api"]
+categories = ["api-bindings", "cryptography::cryptocurrencies", "finance"]
+exclude = [
+    ".github/*",
+    ".gitignore",
+]
 
 [dependencies]
 base64 = "0.22.1"

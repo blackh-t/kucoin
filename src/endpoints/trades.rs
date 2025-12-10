@@ -5,7 +5,7 @@ use crate::{
     types::{
         spot::{
             BatchOrderResult, BatchSpotContract, Side, SpotCancelRequest, SpotCanceledData,
-            SpotData, SpotOrderRequest, SpotOrderResult, Stp, TimeInForce, TradeType,
+            SpotData, SpotOrderRequest, Stp, TimeInForce, TradeType,
         },
         KuCoinResponse,
     },
