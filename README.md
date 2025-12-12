@@ -7,7 +7,7 @@ A robust and asynchronous Rust library for interacting with the KuCoin API. This
 - **Async/Await Support**: Built on `tokio` and `reqwest` for non-blocking I/O.
 - **Spot Trading**: Place market and limit orders, support for batch orders, and order cancellation.
 - **Wallet Management**: Query deposit history and look up deposits by transaction hash.
-- **Sub-Account Management**: Create new sub-accounts, configure permissions, and manage IP whitelists programmatically.
+- **Sub-Account Management**: Get all sub-account info, Create new sub-accounts, configure permissions, and manage IP whitelists programmatically.
 - **Typed Requests**: Uses builder patterns for creating requests (e.g., `SpotOrderRequest`, `DepositHistoryRequest`) to ensure type safety.
 
 ## Installation
@@ -16,7 +16,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-kucoin = "0.3.0"
+kucoin = "0.4.0"
 tokio = { version = "1.0", features = ["full"] }
 dotenv = "0.15" # Optional: for managing environment variables
 ```
@@ -162,6 +162,33 @@ async fn create_sub_account(client: &KuCoinClient) {
     match client.sub_account().add_api(request).await {
         Ok(response) => println!("Sub-account created: {:#?}", response),
         Err(e) => eprintln!("Failed to create sub-account: {:?}", e),
+    }
+}
+```
+
+### 5\.1 Listing Sub-Accounts
+
+Use fetchall to retrieve all sub-accounts and find specific details like the user_id (UID) required for fund transfers.
+
+```rs
+async fn list_sub_accounts(client: &KuCoinClient) {
+    match client.sub_account().fetchall().await {
+        Ok(response) => {
+            // Assuming the response data contains a list of accounts
+            if let Some(sub_accounts) = response.data {
+                println!("Found {} sub-accounts:", sub_accounts.len());
+
+                for account in sub_accounts {
+                    println!("Name: {:<15} | UID: {}", account.sub_name, account.user_id);
+
+                    // Example: Capture the UID for a specific bot
+                    if account.sub_name == "High Freq Bot" {
+                        println!(">> Target UID for transfer: {}", account.user_id);
+                    }
+                }
+            }
+        }
+        Err(e) => eprintln!("Failed to fetch sub-accounts: {:?}", e),
     }
 }
 ```

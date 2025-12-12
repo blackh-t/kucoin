@@ -65,7 +65,7 @@ impl DepositHistoryRequest {
     /// # Returns
     /// - Request query for deposit in string.
     fn build_endpoint(&self) -> String {
-        if let Some(ticker) = self.currency.clone() {
+        if let Some(_) = self.currency.clone() {
             let query = serde_urlencoded::to_string(&self).unwrap();
             return format!("/api/v1/deposits?{}", query);
         }

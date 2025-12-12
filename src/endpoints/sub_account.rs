@@ -4,7 +4,6 @@ use crate::{
         sup_account::{Expire, SubAccData, SubAccListData, SubAccRequest},
         KuCoinResponse,
     },
-    utils::errors::KucoinResults,
 };
 
 impl SubAccRequest {
