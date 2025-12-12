@@ -7,6 +7,7 @@ A robust and asynchronous Rust library for interacting with the KuCoin API. This
 - **Async/Await Support**: Built on `tokio` and `reqwest` for non-blocking I/O.
 - **Spot Trading**: Place market and limit orders, support for batch orders, and order cancellation.
 - **Wallet Management**: Query deposit history and look up deposits by transaction hash.
+- **Sub-Account Management**: Create new sub-accounts, configure permissions, and manage IP whitelists programmatically.
 - **Typed Requests**: Uses builder patterns for creating requests (e.g., `SpotOrderRequest`, `DepositHistoryRequest`) to ensure type safety.
 
 ## Installation
@@ -15,7 +16,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-kucoin = "0.2.0"
+kucoin = "0.3.0"
 tokio = { version = "1.0", features = ["full"] }
 dotenv = "0.15" # Optional: for managing environment variables
 ```
@@ -138,6 +139,29 @@ async fn lookup_tx(client: &KuCoinClient, tx_hash: &str) {
         Ok(Some(deposit)) => println!("Found deposit: {:#?}", deposit),
         Ok(None) => println!("No deposit found with that hash."),
         Err(e) => eprintln!("Lookup error: {:?}", e),
+    }
+}
+```
+
+### 5\. Sub-Account Management
+
+Create new sub-accounts and generate API keys for them directly.
+
+```rs
+use kucoin::types::sup_account::{SubAccRequest, Expire};
+
+async fn create_sub_account(client: &KuCoinClient) {
+    // Configure the new sub-account
+    let request = SubAccRequest::new("SubUser01", "High Freq Bot", "StrongPass123!")
+        .set_permission("General,Spot") // Set permissions
+        .add_ipwhitelist("192.168.1.1") // Whitelist IP
+        .add_ipwhitelist("10.0.0.5")    // Add another IP
+        .set_expire(Expire::Never);     // API Key never expires
+
+    // Send the request
+    match client.sub_account().add_api(request).await {
+        Ok(response) => println!("Sub-account created: {:#?}", response),
+        Err(e) => eprintln!("Failed to create sub-account: {:?}", e),
     }
 }
 ```
