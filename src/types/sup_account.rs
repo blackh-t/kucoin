@@ -68,3 +68,45 @@ pub struct SubAccData {
     /// Sub-account name
     pub sub_name: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubAccListData {
+    /// Current request page
+    pub current_page: i64,
+    pub items: Vec<SubAccListData>,
+    /// Number of results per request. Minimum is 1, maximum is 100
+    pub page_size: i64,
+    /// Total number of messages
+    pub total_num: i64,
+    /// Total number of pages
+    pub total_page: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubAccItem {
+    /// Sub-account Permission
+    pub access: String,
+    /// Time of event
+    pub created_at: i64,
+    pub hosted_status: String,
+    /// Sub-account active permissions: If you do not have the corresponding permissions, you
+    /// must log in to the sub-account and go to the corresponding web page to activate.
+    pub opened_trade_types: Vec<String>,
+    /// Remarks
+    pub remarks: String,
+    /// Sub-account; 2:Enable, 3:Frozen
+    pub status: i64,
+    /// Sub-account name
+    pub sub_name: String,
+    /// Sub-account Permissions
+    pub trade_types: Vec<String>,
+    /// Sub-account type
+    #[serde(rename = "type")]
+    pub item_type: i64,
+    /// Sub-account UID
+    pub uid: i64,
+    /// Sub-account User ID
+    pub user_id: String,
+}

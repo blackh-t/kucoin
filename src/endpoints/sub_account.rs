@@ -1,9 +1,10 @@
 use crate::{
     client::rest::KuCoinClient,
     types::{
-        sup_account::{Expire, SubAccData, SubAccRequest},
+        sup_account::{Expire, SubAccData, SubAccListData, SubAccRequest},
         KuCoinResponse,
     },
+    utils::errors::KucoinResults,
 };
 
 impl SubAccRequest {
@@ -76,6 +77,14 @@ impl<'a> SubAccHander<'a> {
 
         self.client
             .send::<KuCoinResponse<SubAccData>>("POST", &payload, enpoint)
+            .await
+    }
+
+    /// Get every sub-account summary info.
+    pub async fn fetchall(&self) -> Result<KuCoinResponse<SubAccListData>, reqwest::Error> {
+        let endpoint = "/api/v2/sub/user";
+        self.client
+            .send::<KuCoinResponse<SubAccListData>>("GET", "", endpoint)
             .await
     }
 }
