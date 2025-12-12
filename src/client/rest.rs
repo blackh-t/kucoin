@@ -3,7 +3,10 @@ use serde::de::DeserializeOwned;
 use std::str::FromStr;
 
 use crate::{
-    endpoints::{deposit::DepositHandler, trades::SpotHandler, transfer::TransferHandler},
+    endpoints::{
+        deposit::DepositHandler, sub_account::SubAccHander, trades::SpotHandler,
+        transfer::TransferHandler,
+    },
     utils::{
         auth::{encrypt_pass, encrypt_prehash},
         time,
@@ -157,5 +160,9 @@ impl KuCoinClient {
 
     pub fn transfer(&self) -> TransferHandler {
         TransferHandler { client: self }
+    }
+
+    pub fn sub_acc(&self) -> SubAccHander {
+        SubAccHander { client: self }
     }
 }

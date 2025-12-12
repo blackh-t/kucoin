@@ -1,5 +1,6 @@
 pub mod deposit;
 pub mod spot;
+pub mod sup_account;
 pub mod transfer;
 
 use serde::{Deserialize, Serialize};
