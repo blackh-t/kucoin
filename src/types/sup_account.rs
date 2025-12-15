@@ -74,7 +74,7 @@ pub struct SubAccData {
 pub struct SubAccListData {
     /// Current request page
     pub current_page: i64,
-    pub items: Vec<SubAccListData>,
+    pub items: Vec<SubAccItem>,
     /// Number of results per request. Minimum is 1, maximum is 100
     pub page_size: i64,
     /// Total number of messages
