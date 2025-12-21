@@ -5,9 +5,9 @@ A robust and asynchronous Rust library for interacting with the KuCoin API. This
 ## Features
 
 - **Async/Await Support**: Built on `tokio` and `reqwest` for non-blocking I/O.
-- **Spot Trading**: Place market and limit orders, support for batch orders, and order cancellation.
+- **Spot Trading**: Place market and limit orders, support for batch orders, order cancellation, and **retrieving active orders**.
 - **Wallet Management**: Query deposit history and look up deposits by transaction hash.
-- **Sub-Account Management**: Get all sub-account info, Create new sub-accounts, configure permissions, and manage IP whitelists programmatically.
+- **Sub-Account Management**: Get all sub-account info, **check sub-account balances**, create new sub-accounts, configure permissions, and manage IP whitelists programmatically.
 - **Typed Requests**: Uses builder patterns for creating requests (e.g., `SpotOrderRequest`, `DepositHistoryRequest`) to ensure type safety.
 
 ## Installation
@@ -23,7 +23,7 @@ dotenv = "0.15" # Optional: for managing environment variables
 
 ## Usage
 
-### 1\. Client Initialization
+### 1. Client Initialization
 
 To start, you need to initialize the `KuCoinClient` with your API credentials. It is recommended to load these safely from environment variables.
 
@@ -43,9 +43,10 @@ async fn main() {
 
     // Now you can use `client` to access various endpoints
 }
+
 ```
 
-### 2\. Spot Trading
+### 2. Spot Trading
 
 #### Placing a Single Order
 
@@ -65,6 +66,7 @@ async fn place_spot_order(client: &KuCoinClient) {
         Err(e) => eprintln!("Error placing order: {:?}", e),
     }
 }
+
 ```
 
 #### Placing Batch Orders
@@ -90,6 +92,7 @@ async fn place_batch_orders(client: &KuCoinClient) {
         Err(e) => eprintln!("Batch order error: {:?}", e),
     }
 }
+
 ```
 
 #### Canceling an Order
@@ -107,9 +110,35 @@ async fn cancel_order(client: &KuCoinClient, order_id: &str) {
         Err(e) => eprintln!("Cancellation failed: {:?}", e),
     }
 }
+
 ```
 
-### 3\. Deposit History
+#### Retrieving Open Orders
+
+Fetch a list of active orders for a specific symbol (e.g., BTC-USDT).
+
+```rust
+async fn get_open_orders(client: &KuCoinClient) {
+    let ticker = "BTC-USDT";
+
+    match client.spot().list_orders_open(ticker).await {
+        Ok(response) => {
+            if let Some(orders) = response.data {
+                println!("Found {} open orders for {}:", orders.len(), ticker);
+                for order in orders {
+                    println!("Order ID: {}, Price: {}, Size: {}", order.id, order.price, order.size);
+                }
+            } else {
+                println!("No open orders found.");
+            }
+        },
+        Err(e) => eprintln!("Failed to fetch open orders: {:?}", e),
+    }
+}
+
+```
+
+### 3. Deposit History
 
 Query your deposit history with filters for currency, status, and time range.
 
@@ -127,9 +156,10 @@ async fn get_deposit_history(client: &KuCoinClient) {
         Err(e) => eprintln!("Failed to fetch history: {:?}", e),
     }
 }
+
 ```
 
-### 4\. Transaction Lookup
+### 4. Transaction Lookup
 
 Find a specific deposit record by its wallet transaction hash.
 
@@ -141,13 +171,14 @@ async fn lookup_tx(client: &KuCoinClient, tx_hash: &str) {
         Err(e) => eprintln!("Lookup error: {:?}", e),
     }
 }
+
 ```
 
-### 5\. Sub-Account Management
+### 5. Sub-Account Management
 
 Create new sub-accounts and generate API keys for them directly.
 
-```rs
+```rust
 use kucoin::types::sup_account::{SubAccRequest, Expire};
 
 async fn create_sub_account(client: &KuCoinClient) {
@@ -164,13 +195,14 @@ async fn create_sub_account(client: &KuCoinClient) {
         Err(e) => eprintln!("Failed to create sub-account: {:?}", e),
     }
 }
+
 ```
 
-### 5\.1 Listing Sub-Accounts
+### 5.1 Listing Sub-Accounts
 
 Use fetchall to retrieve all sub-accounts and find specific details like the user_id (UID) required for fund transfers.
 
-```rs
+```rust
 async fn list_sub_accounts(client: &KuCoinClient) {
     match client.sub_account().fetchall().await {
         Ok(response) => {
@@ -191,6 +223,23 @@ async fn list_sub_accounts(client: &KuCoinClient) {
         Err(e) => eprintln!("Failed to fetch sub-accounts: {:?}", e),
     }
 }
+
+```
+
+### 5.2 Checking Sub-Account Balance
+
+Retrieve the balance details for a specific sub-account using its User ID.
+
+```rust
+async fn check_sub_balance(client: &KuCoinClient, sub_user_id: &str) {
+    match client.sub_account().balance(sub_user_id).await {
+        Ok(response) => {
+            println!("Balance info: {:#?}", response.data);
+        },
+        Err(e) => eprintln!("Failed to fetch sub-account balance: {:?}", e),
+    }
+}
+
 ```
 
 ## Project Structure
@@ -202,4 +251,4 @@ async fn list_sub_accounts(client: &KuCoinClient) {
 
 ## Contributing
 
-Contributions are welcome\! Please ensure that any new endpoints include appropriate test coverage.
+Contributions are welcome!
