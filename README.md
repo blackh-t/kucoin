@@ -16,7 +16,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-kucoin = "0.4.0"
+kucoin = "0.5.0"
 tokio = { version = "1.0", features = ["full"] }
 dotenv = "0.15" # Optional: for managing environment variables
 ```
