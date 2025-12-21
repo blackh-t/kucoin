@@ -3,11 +3,11 @@ use uuid::Uuid;
 use crate::{
     client::rest::KuCoinClient,
     types::{
+        KuCoinResponse,
         spot::{
             BatchOrderResult, BatchSpotContract, Side, SpotCancelRequest, SpotCanceledData,
-            SpotData, SpotOrderRequest, Stp, TimeInForce, TradeType,
+            SpotData, SpotDatum, SpotOrderRequest, Stp, TimeInForce, TradeType,
         },
-        KuCoinResponse,
     },
     utils::errors::KucoinResults,
 };
@@ -193,6 +193,19 @@ impl<'a> SpotHandler<'a> {
         let res = self
             .client
             .send::<KuCoinResponse<SpotCanceledData>>("DELETE", "", &endpoint)
+            .await?;
+        Ok(res)
+    }
+
+    /// Get open orders
+    pub async fn list_orders_open(
+        &self,
+        ticker: &str,
+    ) -> KucoinResults<KuCoinResponse<Vec<SpotDatum>>> {
+        let endpoint = format!("/api/v1/hf/orders/active?symbol={}", ticker);
+        let res = self
+            .client
+            .send::<KuCoinResponse<Vec<SpotDatum>>>("GET", "", &endpoint)
             .await?;
         Ok(res)
     }
