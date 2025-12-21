@@ -1,8 +1,8 @@
 use crate::{
     client::rest::KuCoinClient,
     types::{
-        sup_account::{Expire, SubAccData, SubAccListData, SubAccRequest},
         KuCoinResponse,
+        sup_account::{Expire, SubAccBalance, SubAccData, SubAccListData, SubAccRequest},
     },
 };
 
@@ -84,6 +84,16 @@ impl<'a> SubAccHander<'a> {
         let endpoint = "/api/v2/sub/user";
         self.client
             .send::<KuCoinResponse<SubAccListData>>("GET", "", endpoint)
+            .await
+    }
+
+    pub async fn balance(
+        &self,
+        user_id: &str,
+    ) -> Result<KuCoinResponse<SubAccBalance>, reqwest::Error> {
+        let endpoint = &format!("/api/v1/sub-accounts/{}", user_id);
+        self.client
+            .send::<KuCoinResponse<SubAccBalance>>("GET", "", endpoint)
             .await
     }
 }

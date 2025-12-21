@@ -110,3 +110,81 @@ pub struct SubAccItem {
     /// Sub-account User ID
     pub user_id: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubAccBalance {
+    /// Funding Account
+    pub main_accounts: Vec<MainAccount>,
+    /// Margin Account
+    pub margin_accounts: Vec<MarginAccount>,
+    /// The username of a sub-user.
+    pub sub_name: String,
+    /// The user ID of a sub-user.
+    pub sub_user_id: String,
+    /// Spot Account
+    pub trade_accounts: Vec<TradeAccount>,
+    /// This param is deprecated and only valid for some old users
+    #[serde(rename = "tradeHFAccounts")]
+    pub trade_hf_accounts: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MainAccount {
+    /// Funds available to withdraw or trade.
+    pub available: Option<String>,
+    /// Total funds in an account.
+    pub balance: Option<String>,
+    /// The base currency amount.
+    pub base_amount: Option<String>,
+    /// Calculated on this currency.
+    pub base_currency: Option<String>,
+    /// The base currency price.
+    pub base_currency_price: Option<String>,
+    /// Currency
+    pub currency: Option<String>,
+    /// Funds on hold (not available for use).
+    pub holds: Option<String>,
+    pub tag: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginAccount {
+    /// Funds available to withdraw or trade.
+    pub available: Option<String>,
+    /// Total funds in an account.
+    pub balance: Option<String>,
+    /// The base currency amount.
+    pub base_amount: Option<String>,
+    /// Calculated on this currency.
+    pub base_currency: Option<String>,
+    /// The base currency price.
+    pub base_currency_price: Option<String>,
+    /// Currency
+    pub currency: Option<String>,
+    /// Funds on hold (not available for use).
+    pub holds: Option<String>,
+    pub tag: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeAccount {
+    /// Funds available to withdraw or trade.
+    pub available: Option<String>,
+    /// Total funds in an account.
+    pub balance: Option<String>,
+    /// The base currency amount.
+    pub base_amount: Option<String>,
+    /// Calculated on this currency.
+    pub base_currency: Option<String>,
+    /// The base currency price.
+    pub base_currency_price: Option<String>,
+    /// Currency
+    pub currency: Option<String>,
+    /// Funds on hold (not available for use).
+    pub holds: Option<String>,
+    pub tag: Option<String>,
+}
