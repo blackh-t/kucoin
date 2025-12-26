@@ -312,3 +312,20 @@ pub enum Type {
     Limit,
     Market,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelAllRes {
+    /// The Symbols Failed to cancel
+    pub failed_symbols: Vec<FailedSymbol>,
+    /// The Symbols Successfully cancelled
+    pub succeed_symbols: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FailedSymbol {
+    /// error message
+    pub error: Option<String>,
+    /// symbol
+    pub symbol: Option<String>,
+}

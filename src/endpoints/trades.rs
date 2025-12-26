@@ -5,8 +5,8 @@ use crate::{
     types::{
         KuCoinResponse,
         spot::{
-            BatchOrderResult, BatchSpotContract, Side, SpotCancelRequest, SpotCanceledData,
-            SpotData, SpotDatum, SpotOrderRequest, Stp, TimeInForce, TradeType,
+            BatchOrderResult, BatchSpotContract, CancelAllRes, Side, SpotCancelRequest,
+            SpotCanceledData, SpotData, SpotDatum, SpotOrderRequest, Stp, TimeInForce, TradeType,
         },
     },
     utils::errors::KucoinResults,
@@ -206,6 +206,15 @@ impl<'a> SpotHandler<'a> {
         let res = self
             .client
             .send::<KuCoinResponse<Vec<SpotDatum>>>("GET", "", &endpoint)
+            .await?;
+        Ok(res)
+    }
+
+    pub async fn close_all(&self) -> KucoinResults<KuCoinResponse<CancelAllRes>> {
+        let endpoint = format!("/api/v1/hf/orders/cancelAll");
+        let res = self
+            .client
+            .send::<KuCoinResponse<CancelAllRes>>("DELETE", "", &endpoint)
             .await?;
         Ok(res)
     }
