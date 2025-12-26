@@ -2,6 +2,7 @@ pub mod deposit;
 pub mod spot;
 pub mod sup_account;
 pub mod transfer;
+pub mod withdraw;
 
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]

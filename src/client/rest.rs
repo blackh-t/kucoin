@@ -5,7 +5,7 @@ use std::str::FromStr;
 use crate::{
     endpoints::{
         deposit::DepositHandler, sub_account::SubAccHander, trades::SpotHandler,
-        transfer::TransferHandler,
+        transfer::TransferHandler, withdrawals::WithdrawHandler,
     },
     utils::{
         auth::{encrypt_pass, encrypt_prehash},
@@ -13,8 +13,8 @@ use crate::{
     },
 };
 use reqwest::{
-    header::{HeaderMap, HeaderValue, InvalidHeaderValue, CONTENT_TYPE},
     Client, Method,
+    header::{CONTENT_TYPE, HeaderMap, HeaderValue, InvalidHeaderValue},
 };
 
 /// Holds API authentication secrets (Key, Secret, Passphrase).
@@ -164,5 +164,9 @@ impl KuCoinClient {
 
     pub fn sub_acc(&self) -> SubAccHander {
         SubAccHander { client: self }
+    }
+
+    pub fn withdraw(&self) -> WithdrawHandler {
+        WithdrawHandler { client: self }
     }
 }
