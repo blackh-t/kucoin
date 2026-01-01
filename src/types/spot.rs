@@ -204,8 +204,8 @@ pub struct SpotCanceledData {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BatchOrderResult {
-    code: String,
-    data: Vec<SpotOrderResult>,
+    pub code: String,
+    pub data: Vec<SpotOrderResult>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
