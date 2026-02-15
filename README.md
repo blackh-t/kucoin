@@ -1,14 +1,23 @@
-# KuCoin Rust Client
+<div align="center">
+  
+# 🦀 KuCoin API-Wraper
+Optimizing for high-frequency trading, automated bots, and enterprise sub-account management.
 
-An **asynchronous, strongly typed Rust client** for the KuCoin REST API.
+[![Crates.io](https://img.shields.io/crates/v/kucoin?style=flat-square&color=dea584)](https://crates.io/crates/kucoin)
+[![Docs.rs](https://img.shields.io/docsrs/kucoin?style=flat-square&color=4d76ae)](https://docs.rs/kucoin)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-Designed for reliability and production use, this crate provides ergonomic wrappers for KuCoin endpoints covering **spot trading**, **wallet activity**, and **sub-account management**.
+[Documentation](https://docs.rs/kucoin) ·
+[Report Bug](https://github.com/your-username/kucoin/issues) ·
+[Request Feature](https://github.com/your-username/kucoin/issues)
+
+</div>
 
 ---
 
 ## Features
 
-- **Async-first** — built on `tokio` and `reqwest`
+- built on `async` and `reqwest`
 - **Spot trading**
   - Market & limit orders
   - Batch orders
@@ -19,15 +28,18 @@ Designed for reliability and production use, this crate provides ergonomic wrapp
   - Deposit history with filters
   - Lookup by transaction hash
 
+
 - **Sub-accounts**
   - List sub-accounts
   - Create API keys
   - Configure permissions & IP whitelists
   - Query sub-account balances
 
+
 - **Typed requests**
   - Builder-pattern request structs
   - Compile-time parameter validation
+
 
 ---
 
@@ -43,6 +55,13 @@ dotenv = "0.15" # optional
 ---
 
 ## Quick Start
+```
+project-root/
+├── client/        # Authentication & HTTP layer
+├── endpoints/     # KuCoin API endpoints
+├── types/         # Request and response models
+└── utils/         # HMAC-SHA256, system time, error types
+```
 
 ### Client Initialization
 
@@ -176,28 +195,21 @@ async fn balance(client: &KuCoinClient, uid: &str) {
 
 ---
 
-## Real-World Usage
 
-This crate is used in **CoinBot**, an automated crypto trading platform built in Rust.
+## 🌍 Production Usage
 
-- Website: [https://coinbot.locker](https://coinbot.locker)
-- Project: CoinBot (private / production system)
+This crate serves as the production trading core for **CoinBot**, an automated trading platform.
 
-This serves as a production reference for high-frequency and automated trading workloads.
+- High-frequency workloads
+- Real-time order execution
+- Enterprise sub-account orchestration
 
----
-
-## Project Structure
-
-- `client/` — authentication & HTTP layer
-- `endpoints/` — KuCoin API endpoints
-- `types/` — request and response models
-- `utils/` — shared helpers
+Project: https://coinbot.locker
 
 ---
 
-## Contributing
 
-Issues and pull requests are welcome.
+<div align="center">
+<sub>Built with precision in Rust 🦀 Contributions are welcome </sub>
+</div>
 
----
